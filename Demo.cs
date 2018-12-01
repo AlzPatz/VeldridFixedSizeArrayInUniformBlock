@@ -37,17 +37,9 @@ namespace arrayuniform
         public const int SizeInBytes = 16;
     }
 
-    [StructLayout(LayoutKind.Explicit)]
-    public struct UniformBlockStruct
-    {
-        [FieldOffset(0)]
-        public ExampleStruct[] ArrayOfExampleStructs;
-    }
-
     public class Demo
     {
         private const int UNIFORM_ARRAY_SIZE = 4; 
-        private UniformBlockStruct _data;
 
         public void Run()
         {
@@ -140,10 +132,8 @@ namespace arrayuniform
                 new ResourceSetDescription(resourceLayout[0], _uniformBuffer)
             );
 
-            _data = new UniformBlockStruct
+            var data = new ExampleStruct[]
             {
-                ArrayOfExampleStructs = new ExampleStruct[]
-                {
                     new ExampleStruct() 
                     {
                         V0 = Vector2.One,
@@ -164,8 +154,9 @@ namespace arrayuniform
                         V0 = Vector2.One,
                         V1 = Vector2.One
                     }
-                } 
             };
+
+            _device.UpdateBuffer(_uniformBuffer, 0, data);
 
             var pipelineDescription = new GraphicsPipelineDescription()
             {
@@ -203,8 +194,6 @@ namespace arrayuniform
 
         private void Render()
         {
-            _device.UpdateBuffer(_uniformBuffer, 0, ref _data);
-
             _cl.Begin();
 
             _cl.SetFramebuffer(_device.SwapchainFramebuffer);
